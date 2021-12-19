@@ -6,33 +6,16 @@ Since PacktPub restructured their website [packtpub-library-downloader](https://
 
 ## Usage:
     pip install -r requirements.txt
-	python main.py -e <email> -p <password> [-d <directory> -b <book file types> -s -v -q]
+	python main.py -e <email> -p <password> [-d <directory> -t <book file types> -s -v -q]
 
 ##### Example: Download books in PDF format
-	python main.py -e hello@world.com -p p@ssw0rd -d ~/Desktop/packt -b pdf,epub,mobi,code
-
-## Docker integration
-
-You must put your data in the `.env` file. 
-
-```
-mv data.env-sample data.env
-```
-
-and replace the sample data with your login credentials.
-
-```
-docker-compose up
-```
-
-After the execution, you can see the content in the `book` directory.
-
+	python main.py -e hello@world.com -p p@ssw0rd -d ~/Desktop/packt -t pdf,epub,mobi,code
 
 ## Commandline Options
 - *-e*, *--email* = Your login email
 - *-p*, *--password* = Your login password
 - *-d*, *--directory* = Directory to download into. Default is "media/" in the current directory
-- *-b*, *--books* = Assets to download. Options are: *pdf,mobi,epub,code*
+- *-t*, *--types* = Assets to download. Options are: *pdf,mobi,epub,code*
 - *-s*, *--separate* = Create a separate directory for each book
 - *-v*, *--verbose* = Show more detailed information
 - *-q*, *--quiet* = Don't show information or progress bars
@@ -43,5 +26,3 @@ After the execution, you can see the content in the `book` directory.
 - *mobi*: MOBI format
 - *epub*: EPUB format
 - *code*: Accompanying source code, saved as .zip files
-
-I'm working on Python 3.6.0 

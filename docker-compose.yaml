@@ -1,0 +1,15 @@
+version: '3.3'
+
+services:
+  packtpub-downloader:
+    build:
+      context: .
+      args:
+        PUID: 1000
+        PGID: 1001
+
+    env_file:
+      - data.env
+
+    volumes:
+      - "./packtpub:/app/books"

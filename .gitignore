@@ -104,3 +104,6 @@ venv.bak/
 .mypy_cache/
 
 *.env
+
+.idea
+src/test.py

@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-'''
-    This file contain all url endpoint 
-'''
+"""
+This file contain all url endpoint
+"""
 
-# instead of variables should i change variables to a one big json of urls ? 
+# instead of variables should i change variables to a one big json of urls ?
 
 # this is base url where i do the requests
 BASE_URL = "https://services.packtpub.com/"
@@ -20,3 +20,6 @@ URL_BOOK_TYPES_ENDPOINT = "products-v1/products/{book_id}/types"
 
 # URL to get url file to download, params are book id and format of the file (can be pdf, epub, etc..), method GET
 URL_BOOK_ENDPOINT = "products-v1/products/{book_id}/files/{format}"
+
+# timestamp format used by packtpub api
+TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"

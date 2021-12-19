@@ -1,2 +1,3 @@
-pip install -r /app/requirements.txt
-python /app/main.py -e $EMAIL -p $PASSWORD -d /app/book -b pdf,mobi,epub,code
+#!/usr/bin/env bash
+
+python /app/main.py -v -e $EMAIL -p $PASSWORD -t $FILE_TYPES -s -d /app/books
