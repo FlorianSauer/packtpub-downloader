@@ -45,7 +45,7 @@ class PacktpubBooksGrabber(object):
 
         books = Api.get_all_books(user, limit=25, verbose=self.namespace.verbose, quiet=self.namespace.quiet)
 
-        books_progress_bar = tqdm(books, disable=self.namespace.quiet)
+        books_progress_bar = tqdm(books, disable=self.namespace.quiet, unit='Books')
 
         for book in books_progress_bar:
             book_name = book.product_name.replace(' ', '_').replace('.', '_').replace(':', '_')
