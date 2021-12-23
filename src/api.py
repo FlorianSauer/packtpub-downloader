@@ -168,6 +168,10 @@ class Api(object):
 
         url = cls._get_url_for_book(user, book, book_format, verbose, printer)
 
+        if not url:
+            printer.write("Unable to download book {} as {}".format(book.product_name, book_format))
+            return
+
         with open(filename, 'wb') as f:
 
             if verbose:
