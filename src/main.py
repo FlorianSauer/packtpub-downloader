@@ -43,6 +43,9 @@ class PacktpubBooksGrabber(object):
         # create user with his properly header
         user = User(self.namespace.email, self.namespace.password)
 
+        # login user manually
+        user.get_header()
+
         books = Api.get_all_books(user, limit=25, verbose=self.namespace.verbose, quiet=self.namespace.quiet)
 
         books_progress_bar = tqdm(books, disable=self.namespace.quiet, unit='Books')
