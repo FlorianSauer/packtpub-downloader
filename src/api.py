@@ -5,6 +5,7 @@ import requests
 from tqdm import tqdm
 
 from config import BASE_URL, PRODUCTS_ENDPOINT, TIMESTAMP_FORMAT, URL_BOOK_TYPES_ENDPOINT, URL_BOOK_ENDPOINT
+# noinspection PyCompatibility
 from user import User
 
 
@@ -19,10 +20,10 @@ class Book(object):
     #  'createdAt': '2021-12-18T00:19:40.773Z',
     #  'updatedAt': '2021-12-18T00:19:40.773Z'}
 
-    def __init__(self, id, user_id, product_id, product_name, release_date, entitlement_source, entitlement_link,
+    def __init__(self, book_id, user_id, product_id, product_name, release_date, entitlement_source, entitlement_link,
                  created_at, updated_at):
         # type: (str, str, int, str, datetime, str, str, datetime, datetime) -> None
-        self.id = id
+        self.book_id = book_id
         self.user_id = user_id
         self.product_id = product_id
         self.product_name = product_name
@@ -49,7 +50,7 @@ class Book(object):
     @classmethod
     def from_json(cls, json_dict):
         return cls(
-            id=json_dict['id'],
+            book_id=json_dict['id'],
             user_id=json_dict['userId'],
             product_id=int(json_dict['productId']),
             product_name=json_dict['productName'],
@@ -122,7 +123,7 @@ class Api(object):
 
     @classmethod
     def get_file_types_for_book(cls, user, book, verbose, printer):
-        # type: (User, Book, bool, tqdm) -> None
+        # type: (User, Book, bool, tqdm) -> bool
         url = BASE_URL + URL_BOOK_TYPES_ENDPOINT.format(book_id=book.product_id)
 
         if verbose:
@@ -130,23 +131,27 @@ class Api(object):
 
         r = requests.get(url, headers=user.get_header())
 
-        if (r.status_code == 200):  # success
+        if r.status_code == 200:  # success
             file_types = r.json()['data'][0].get('fileTypes', [])
             book.set_file_types(file_types)
-        elif (r.status_code == 401):  # jwt expired
+            return True
+        elif r.status_code == 401:  # jwt expired
             user.refresh_header()  # refresh token
             return cls.get_file_types_for_book(user, book, verbose, printer)  # call recursive
         else:
-            printer.write('ERROR (please copy and paste in the issue)')
-            printer.write("HTTP Status Code: {}".format(r.status_code))
-            printer.write(str(r.json()))
-            book.set_file_types([])
-            return
+            printer.write("Unable to fetch available book types for book{}".format(
+                book.product_name
+            ))
+            if verbose:
+                printer.write('ERROR (please copy and paste in the issue)')
+                printer.write("HTTP Status Code: {}".format(r.status_code))
+                printer.write(str(r.json()))
+            return False
 
     @classmethod
     def _get_url_for_book(cls, user, book, book_format, verbose, printer):
         # type: (User, Book, str, bool, tqdm) -> str
-        url = BASE_URL + URL_BOOK_ENDPOINT.format(book_id=book.product_id, format=format)
+        url = BASE_URL + URL_BOOK_ENDPOINT.format(book_id=book.product_id, format=book_format)
         if verbose:
             printer.write("GET {}".format(url))
         r = requests.get(url, headers=user.get_header())
@@ -193,7 +198,7 @@ class Api(object):
                 printer.write('... done')
             elif r.status_code == 401:  # jwt expired
                 user.refresh_header()  # refresh token
-                return cls.download_book(user, book, book_format, filename)  # call recursive
+                return cls.download_book(user, book, book_format, filename, verbose, printer)  # call recursive
             else:
                 printer.write('ERROR (please copy and paste in the issue)')
                 printer.write("HTTP Status Code: {}".format(r.status_code))

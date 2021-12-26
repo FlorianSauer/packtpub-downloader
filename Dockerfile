@@ -6,7 +6,7 @@ ARG UNAME=testuser
 
 ENV EMAIL="" \
     PASSWORD="" \
-    FILE_TYPES="pdf,mobi,epub,code"
+    FILE_TYPES="pdf,mobi,epub,code,video"
 
 WORKDIR /app
 

@@ -2,10 +2,12 @@ import argparse
 import os.path
 import sys
 from enum import Enum
+from pathlib import Path
 
 from tqdm import tqdm
 
 from api import Api
+# noinspection PyCompatibility
 from user import User
 
 
@@ -14,6 +16,11 @@ class FileTypeNames(Enum):
     mobi = 'mobi'
     epub = 'epub'
     code = 'zip'
+    video = 'video.zip'
+
+
+def _touch_file(path):
+    Path(path).touch(exist_ok=True)
 
 
 class PacktpubBooksGrabber(object):
@@ -21,10 +28,14 @@ class PacktpubBooksGrabber(object):
     parser.add_argument('-e', '--email', required=True)
     parser.add_argument('-p', '--password', required=True)
     parser.add_argument('-d', '--directory', default='.')
-    parser.add_argument('-t', '--types', default='pdf,mobi,epub,code')
+    parser.add_argument('-t', '--types', default='pdf,mobi,epub,code,video',
+                        type=lambda s: s.lower().split(','))
     parser.add_argument('-s', '--separate', action='store_true')
     parser.add_argument('-v', '--verbose', action='store_true')
     parser.add_argument('-q', '--quiet', action='store_true')
+    parser.add_argument('-f', '--filter', action='store_true',
+                        help="Creates hidden files for unavailable book types, so future downloads run faster. "
+                             "Disable this flag to recheck the availability of book types for your books.")
 
     def __init__(self):
         self.namespace = None
@@ -34,7 +45,9 @@ class PacktpubBooksGrabber(object):
         if self.namespace.verbose and self.namespace.quiet:
             self.parser.error("Verbose and quiet cannot be used together.")
         self.namespace.directory = os.path.abspath(os.path.expanduser(self.namespace.directory))
-        self.namespace.types = self.namespace.types.split(',')
+        unsupported_book_types = set(self.namespace.types).difference({'pdf', 'mobi', 'epub', 'code', 'video'})
+        if unsupported_book_types:
+            self.parser.error("Unsupported Book type '{}'".format(unsupported_book_types.pop()))
 
     def run(self):
         if not os.path.exists(self.namespace.directory):
@@ -53,21 +66,41 @@ class PacktpubBooksGrabber(object):
         for book in books_progress_bar:
             book_name = book.product_name.replace(' ', '_').replace('.', '_').replace(':', '_')
             for requested_file_type in self.namespace.types:
+                # videos have the string '[Video]' in the product_name, all other books can skip this file type safely
+                if requested_file_type == 'video' and '[Video]' not in book.product_name:
+                    continue
                 if self.namespace.separate:
                     target_dir = os.path.join(self.namespace.directory, book_name)
+                    filename = os.path.join(target_dir,
+                                            book_name + '.' + FileTypeNames[requested_file_type].value)
+                    filter_filename = os.path.join(target_dir,
+                                                   '.' + requested_file_type + '_unavailable')
                 else:
                     target_dir = self.namespace.directory
-
-                filename = os.path.join(target_dir,
-                                        book_name + '.' + FileTypeNames[requested_file_type].value)
+                    filename = os.path.join(target_dir,
+                                            book_name + '.' + FileTypeNames[requested_file_type].value)
+                    filter_filename = os.path.join(target_dir,
+                                                   '.' + book_name + '_' + requested_file_type + '_unavailable')
 
                 if not os.path.exists(filename):
+                    # check if we should filter unavailable book types
+                    if self.namespace.filter and os.path.exists(filter_filename):
+                        books_progress_bar.write(
+                            "Unavailable file type {} for book {} was filtered".format(
+                                requested_file_type, book.product_name))
+                        continue
                     # requested file type for book does not exist yet, check if it is available at all
-                    Api.get_file_types_for_book(user, book, self.namespace.verbose, books_progress_bar)
+                    if not book.has_file_types():
+                        if not Api.get_file_types_for_book(user, book, self.namespace.verbose, books_progress_bar):
+                            break
                     if requested_file_type not in book.file_types:
                         books_progress_bar.write("File Type {} is not available for book {}".format(
                             requested_file_type, book.product_name))
-                        continue
+                        if self.namespace.filter:
+                            os.makedirs(target_dir, exist_ok=True)
+                            _touch_file(filter_filename)
+                        else:
+                            continue
                     else:
                         os.makedirs(target_dir, exist_ok=True)
                         Api.download_book(user, book, requested_file_type, filename, self.namespace.verbose,

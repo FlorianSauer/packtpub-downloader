@@ -19,6 +19,7 @@ Since PacktPub restructured their website [packtpub-library-downloader](https://
 - *-s*, *--separate* = Create a separate directory for each book
 - *-v*, *--verbose* = Show more detailed information
 - *-q*, *--quiet* = Don't show information or progress bars
+- *-f*, *--filter* = Creates hidden files for unavailable book types, so future downloads run faster. Disable this flag to recheck the availability of book types for your books.
 
 **Book File Types**
 
