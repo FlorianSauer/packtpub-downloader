@@ -195,6 +195,7 @@ class Api(object):
                     if chunk:
                         f.write(chunk)
                         progress_bar.update(len(chunk))
+                progress_bar.close()
                 printer.write('... done')
             elif r.status_code == 401:  # jwt expired
                 user.refresh_header()  # refresh token
