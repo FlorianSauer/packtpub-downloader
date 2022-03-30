@@ -64,7 +64,8 @@ class PacktpubBooksGrabber(object):
         books_progress_bar = tqdm(books, disable=self.namespace.quiet, unit='Books')
 
         for book in books_progress_bar:
-            book_name = book.product_name.replace(' ', '_').replace('.', '_').replace(':', '_').replace('?', '_')
+            book_name = book.product_name.replace(' ', '_').replace('.', '_').replace(':', '_').replace(
+                '?', '_').replace('/', ' - ')
             for requested_file_type in self.namespace.types:
                 # videos have the string '[Video]' in the product_name, all other books can skip this file type safely
                 if requested_file_type == 'video' and '[Video]' not in book.product_name:
