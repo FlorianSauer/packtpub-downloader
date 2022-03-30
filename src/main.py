@@ -65,7 +65,7 @@ class PacktpubBooksGrabber(object):
 
         for book in books_progress_bar:
             book_name = book.product_name.replace(' ', '_').replace('.', '_').replace(':', '_').replace(
-                '?', '_').replace('/', ' - ')
+                '?', '_').replace('/', '_-_')
             for requested_file_type in self.namespace.types:
                 # videos have the string '[Video]' in the product_name, all other books can skip this file type safely
                 if requested_file_type == 'video' and '[Video]' not in book.product_name:
