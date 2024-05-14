@@ -1,4 +1,4 @@
-FROM python:3.6.0
+FROM python:3.10
 
 ARG PUID=1000
 ARG PGID=1000
