@@ -63,7 +63,15 @@ class PacktpubBooksGrabber(object):
 
         books_progress_bar = tqdm(books, disable=self.namespace.quiet, unit='Books')
 
+        # create set with book titles to filter duplicates
+        book_titles = set()
+
         for book in books_progress_bar:
+            # filter duplicates
+            if book.product_name.lower() in book_titles:
+                continue
+            book_titles.add(book.product_name.lower())
+
             book_name = book.product_name.replace(' ', '_').replace('.', '_').replace(':', '_').replace(
                 '?', '_').replace('/', '_-_')
             for requested_file_type in self.namespace.types:
