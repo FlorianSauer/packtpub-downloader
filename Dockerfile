@@ -6,7 +6,8 @@ ARG UNAME=testuser
 
 ENV EMAIL="" \
     PASSWORD="" \
-    FILE_TYPES="pdf,mobi,epub,code,video"
+    FILE_TYPES="pdf,mobi,epub,code,video" \
+    PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
